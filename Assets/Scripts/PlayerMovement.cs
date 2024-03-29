@@ -7,34 +7,83 @@ public class PlayerMovement : MonoBehaviour
 
     public float playerMoveSpeed = 15.0f;
     public float jumpingPower = 8.0f;
+    public float attackPower = 5.0f;
+    public float attackRange = 0.5f;
+    public float attackDelay = 0.5f;
 
     private float horizontal = 0.0f;
     private bool jump = false;
     private bool isFacingRight = true;
+    private Vector2 forceDirection = Vector2.right;
     
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private SpriteRenderer sr;
+    [SerializeField] private Transform attackPoint;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask foregroundLayer;
     [SerializeField] private Animator animator;
     
-
 
     // Start is called before the first frame update
     void Start()
     {
-        
+
+    }
+
+    void Attack()
+    {
+        animator.SetTrigger("specialMove"); 
+        horizontal = 0.0f;
+
+        new WaitForSeconds(attackDelay);
+    
+    // Loop for hitting enemies taken from Brackey's "MELEE COMBAT in Unity" video, shows the range of the attack 
+       Collider2D[] hitObjects =  Physics2D.OverlapCircleAll(attackPoint.position, attackRange, foregroundLayer);
+       foreach(Collider2D hitObject in hitObjects)
+       {
+           Debug.Log("Hit " + hitObject.name);
+
+           Rigidbody2D attackedRigidBody = hitObject.attachedRigidbody;
+           // add velocity to game object with a time offset
+
+
+           if (!isFacingRight) 
+           {
+               forceDirection = Vector2.left;
+               Debug.Log("Direction set to left");
+           }          
+           else 
+           {
+               forceDirection = Vector2.right;
+               Debug.Log("Direction set to right");
+           }
+           attackedRigidBody.AddForce(forceDirection * attackPower, ForceMode2D.Force);
+       }
+
+    }
+    // From Brackey's "MELEE COMBAT in Unity" video, shows the range of the attack point
+    void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null) 
+        {
+            return;
+        }
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
     }
 
     private bool IsGrounded()
     {
-        return Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer);
-        // return true;
+        // considered grounded if ontop of something on the foreground (i.e., a block) or the ground
+        return (Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer) || Physics2D.OverlapCircle(groundCheck.position, 0.1f, foregroundLayer));
     }
+
+
 
     private float RunningValue()
     {
-        if (!IsGrounded()) {
+        if (!IsGrounded()) 
+        {
             return 0.0f;
         }
         else {
@@ -51,8 +100,7 @@ public class PlayerMovement : MonoBehaviour
         // special move
         if (Input.GetButtonDown("Fire1"))
         {
-            animator.SetTrigger("specialMove"); 
-            horizontal = 0.0f;
+            Attack();
         }
 
         // changes direction
@@ -72,7 +120,7 @@ public class PlayerMovement : MonoBehaviour
         // changes the sensitivity of the jump button
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0.0f)
         {
-            rb. velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }    
 
     }
@@ -83,5 +131,7 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(horizontal * playerMoveSpeed * Time.deltaTime, rb.velocity.y);
         animator.SetFloat("running", RunningValue());
         sr.flipX = !isFacingRight;
+
+        rb.velocity = new Vector2(horizontal * playerMoveSpeed * Time.deltaTime, rb.velocity.y);
     }
 }
