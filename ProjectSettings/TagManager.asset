@@ -15,7 +15,7 @@ TagManager:
   - Platform
   - Foreground
   - Player
-  - 
+  - Background
   - 
   - 
   - 
@@ -46,6 +46,9 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Light Clouds
+    uniqueID: 514751769
     locked: 0
   - name: Foreground
     uniqueID: 3741107557

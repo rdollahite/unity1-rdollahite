@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public float attackPower = 5.0f;
     public float attackRange = 0.5f;
     public float attackDelay = 0.5f;
+    public float overlap = 0.1f;
 
     private float horizontal = 0.0f;
     private bool jump = false;
@@ -75,7 +76,7 @@ public class PlayerMovement : MonoBehaviour
     private bool IsGrounded()
     {
         // considered grounded if ontop of something on the foreground (i.e., a block) or the ground
-        return (Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer) || Physics2D.OverlapCircle(groundCheck.position, 0.1f, foregroundLayer));
+        return (Physics2D.OverlapCircle(groundCheck.position, overlap, groundLayer) || Physics2D.OverlapCircle(groundCheck.position, overlap, foregroundLayer));
     }
 
 
